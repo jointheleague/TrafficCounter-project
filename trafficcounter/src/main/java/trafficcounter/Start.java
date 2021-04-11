@@ -11,7 +11,7 @@ import org.opencv.imgproc.Imgproc;
 public class Start {
 
     /* change this path to an image on your disk which you want to work with */
-    public static final String IMAGE_PATH = "src/main/java/Face1.jpg";
+    public static final String IMAGE_PATH = "src/main/java/trafficcounter/Car2.jpg";
 
     /* window size */
     public static final int WINDOW_HEIGHT = 800;
@@ -19,20 +19,25 @@ public class Start {
 
     public static void main(String[] args) {
 
-        /* load the native library */
+    	
+        // load the native library 
     	nu.pattern.OpenCV.loadShared();
 
         ImageHelper helper = new ImageHelper();
+      //  Mat image = Mat.zeros( WINDOW_HEIGHT, WINDOW_WIDTH,  CV_8UC3 );
 
-        /* read an image to work with from disk */
+        // read an image to work with from disk 
         Mat input = Imgcodecs.imread(IMAGE_PATH);
 
-        /* perform image processing on this image */
+        // perform image processing on this image 
         Mat processedImage = processImage(input);
 
-        /* add the original and the processed image to the panel and show the window */
+        // add the original and the processed image to the panel and show the window 
         helper.addImage(input);
         helper.addImage(processedImage);
+        
+        
+        
 
     }
 
@@ -52,7 +57,7 @@ public class Start {
          *  For example: Convert colors to gray
          * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        Imgproc.cvtColor(input, processed, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.cvtColor(input, processed, Imgproc.MORPH_GRADIENT);
 
 
         return processed;
