@@ -1,7 +1,12 @@
 package trafficcounter;
 
+import java.util.*;
+
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -11,7 +16,7 @@ import org.opencv.imgproc.Imgproc;
 public class Start {
 
     /* change this path to an image on your disk which you want to work with */
-    public static final String IMAGE_PATH = "src/main/java/trafficcounter/Car2.jpg";
+    public static final String IMAGE_PATH = "src/main/java/trafficcounter/Traffic1.jpg";
 
     /* window size */
     public static final int WINDOW_HEIGHT = 800;
@@ -50,16 +55,65 @@ public class Start {
     public static Mat processImage(Mat input) {
 
         Mat processed = new Mat();
-
+        Mat mask = new Mat();
+        Mat morphOutput = new Mat();
+        
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
          *  This is your place to start.
          *  Do whatever you want with OpenCV here!
          *  For example: Convert colors to gray
          * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        Imgproc.cvtColor(input, processed, Imgproc.MORPH_GRADIENT);
+        Imgproc.blur(input, processed, new Size(7, 7));
+        
+       // Imgproc.cvtColor(processed, processed, Imgproc.COLOR_BGR2HSV);
+         Imgproc.cvtColor(processed, processed, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.equalizeHist(processed, processed);
 
+        /*
+        Scalar minValues = new Scalar(20, 20, 20);
+        Scalar maxValues = new Scalar(120,120,120);
+        		
+        
+        Core.inRange(processed, minValues, maxValues, mask);
+        
+        
+        Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(24, 24));
+        Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(12, 12));
 
+        Imgproc.erode(mask, morphOutput, erodeElement);
+        Imgproc.erode(mask, morphOutput, erodeElement);
+
+        Imgproc.dilate(mask, morphOutput, dilateElement);
+        Imgproc.dilate(mask, morphOutput, dilateElement);
+
+        
+        processed = findContours(processed,morphOutput);*/
         return processed;
     }
+    
+    public static Mat findContours(Mat frame , Mat maskedImage) {
+    	// init
+    	List<MatOfPoint> contours = new ArrayList<>();
+    	Mat hierarchy = new Mat();
+ 
+    	//Imgproc.cvtColor(maskedImage, blackAndWhite, Imgproc.COLOR_BGR2GRAY);
+    	// find contours
+    	
+    	Imgproc.findContours(maskedImage, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+
+    	// if any contour exist...
+    	if (hierarchy.size().height > 0 && hierarchy.size().width > 0)
+    	{
+    	        // for each contour, display it in blue
+    			
+    	        for (int idx = 0; idx >= 0; idx = (int) hierarchy.get(0, idx)[0])
+    	        {
+    	                Imgproc.drawContours(frame, contours, idx, new Scalar(0, 255, 255));
+    	        }
+    	}
+    	
+    	return frame;
+    }
+    
 }
