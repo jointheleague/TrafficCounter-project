@@ -1,6 +1,11 @@
 package trafficcounter;
 
+import java.io.File;
+
+import java.io.FileNotFoundException;
+import java.nio.file.Paths;
 import java.util.*;
+
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -10,40 +15,78 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.video.BackgroundSubtractor;
+import org.opencv.video.Video;
+import org.opencv.videoio.VideoCapture;
+import org.opencv.videoio.Videoio;
+
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+
 /**
  * Created by tobias on 25.08.17.
  */
 public class Start {
 
     /* change this path to an image on your disk which you want to work with */
-    public static final String IMAGE_PATH = "src/main/java/trafficcounter/Traffic1.jpg";
+    //public static final String IMAGE_PATH = "src/main/java/trafficcounter/Traffic1.jpg";
 
     /* window size */
     public static final int WINDOW_HEIGHT = 800;
     public static final int WINDOW_WIDTH = 1600;
 
     public static void main(String[] args) {
-
-    	
-        // load the native library 
     	nu.pattern.OpenCV.loadShared();
-
         ImageHelper helper = new ImageHelper();
-      //  Mat image = Mat.zeros( WINDOW_HEIGHT, WINDOW_WIDTH,  CV_8UC3 );
+        BackgroundSubtractor backSub = Video.createBackgroundSubtractorMOG2();
+      
+        VideoCapture capture = new VideoCapture();
+        capture.open(0);
 
-        // read an image to work with from disk 
-        Mat input = Imgcodecs.imread(IMAGE_PATH);
-
-        // perform image processing on this image 
-        Mat processedImage = processImage(input);
-
-        // add the original and the processed image to the panel and show the window 
-        helper.addImage(input);
-        helper.addImage(processedImage);
+        if (!capture.isOpened()) {
+            System.err.println("Unable to open vid");
+            System.exit(0);
+        } 
+        
+        Mat frame = new Mat(), fgMask = new Mat();
+        Scalar lowerb  = new Scalar(0);
+        Scalar upperb = new Scalar (150);
+        
+        while (true) {
+        capture.read(frame);
+        
+        backSub.apply(frame, fgMask);
+        
+        //Imgproc.rectangle(frame, new Point(10, 2), new Point(100, 20), new Scalar(255, 255, 255), -1);
+        //String frameNumberString = String.format("%d", (int)capture.get(Videoio.CAP_PROP_POS_FRAMES));
+        //Imgproc.putText(frame, frameNumberString, new Point(15, 15), Core.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 0));
         
         
+        Imgproc.GaussianBlur(fgMask, fgMask, new Size(7, 7), 0);
+        Imgproc.blur(fgMask, fgMask, new Size(25,25));
+        Core.inRange(fgMask, lowerb, upperb, fgMask);
+        Imgproc.blur(fgMask, fgMask, new Size(25,25));
+        Core.inRange(fgMask, lowerb, upperb, fgMask);
         
-
+        //draws rectangles around blurs
+        List<MatOfPoint> contours = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        
+        Imgproc.findContours(fgMask, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        for(MatOfPoint mop: contours) {
+        	Rect r = Imgproc.boundingRect(mop);
+        	if(r.width*r.height>200) {
+        	Imgproc.rectangle(frame, r.tl(), r.br(), new Scalar(0,0,255));
+        	}
+        }
+        //frame is the output, fgMask is the processed image
+        //helper.addImage(frame);
+        helper.addImage(fgMask);
+        
+        }
     }
 
 
