@@ -2,6 +2,7 @@ package trafficcounter;
 
 import java.io.File;
 
+
 import java.io.FileNotFoundException;
 import java.nio.file.Paths;
 import java.util.*;
@@ -55,8 +56,10 @@ public class Start {
         Scalar lowerb  = new Scalar(0);
         Scalar upperb = new Scalar (150);
         
+        Scalar topb = new Scalar(255);
         while (true) {
         capture.read(frame);
+        
         
         backSub.apply(frame, fgMask);
         
@@ -66,9 +69,9 @@ public class Start {
         
         
         Imgproc.GaussianBlur(fgMask, fgMask, new Size(7, 7), 0);
-        Imgproc.blur(fgMask, fgMask, new Size(25,25));
+        Imgproc.blur(fgMask, fgMask, new Size(40,40));
         Core.inRange(fgMask, lowerb, upperb, fgMask);
-        Imgproc.blur(fgMask, fgMask, new Size(25,25));
+        Imgproc.blur(fgMask, fgMask, new Size(40,40));
         Core.inRange(fgMask, lowerb, upperb, fgMask);
         
         //draws rectangles around blurs
@@ -77,14 +80,21 @@ public class Start {
         
         Imgproc.findContours(fgMask, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
         for(MatOfPoint mop: contours) {
-        	Rect r = Imgproc.boundingRect(mop);
+        
+        	/*Rect r = Imgproc.boundingRect(mop);
         	if(r.width*r.height>200) {
         	Imgproc.rectangle(frame, r.tl(), r.br(), new Scalar(0,0,255));
-        	}
+        	
+        	}*/
+        	
         }
+       Imgproc.cvtColor(fgMask, fgMask, Imgproc.COLOR_GRAY2RGB);
+        Core.bitwise_and(frame, fgMask, frame);
         //frame is the output, fgMask is the processed image
         //helper.addImage(frame);
-        helper.addImage(fgMask);
+        ImageDetection id = new ImageDetection();
+        id.run(args, frame);
+        //helper.addImage(frame);
         
         }
     }

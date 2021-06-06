@@ -15,7 +15,7 @@ public class ImageDetection {
 	public static void main(String[] args) {
         // Load the native OpenCV library
 		nu.pattern.OpenCV.loadShared();
-        new ImageDetection().run(args);
+        new ImageDetection().run(args, null);
     }
 	
 	
@@ -58,7 +58,7 @@ public class ImageDetection {
         //-- Show what you got
         ih.addImage(frame);
     }
-    public void run(String[] args) {
+    public void run(String[] args, Mat frameInput) {
         String filenameFaceCascade = args.length > 2 ? args[0] : "src/main/java/trafficcounter/resources/cars.xml";
       //  String filenameSideFaceCascade = "src/main/java/trafficcounter/resources/haarcascade_profileface.xml";
         String filenameEyesCascade = args.length > 2 ? args[1] : "src/main/java/trafficcounter/resources/haarcascade_eye_tree_eyeglasses.xml";
@@ -95,8 +95,8 @@ public class ImageDetection {
            
           
         }*/
-        Mat frame = Imgcodecs.imread("src/main/java/trafficcounter/Traffic1.jpg");
-        detectAndDisplay(frame, faceCascade, eyesCascade/*, sideFaceCascade*/);
+        //Mat frame = Imgcodecs.imread("src/main/java/trafficcounter/Traffic1.jpg");
+        detectAndDisplay(frameInput, faceCascade, eyesCascade/*, sideFaceCascade*/);
        // System.exit(0);
     }
 }
