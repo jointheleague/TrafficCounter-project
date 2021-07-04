@@ -59,9 +59,9 @@ public class ImageDetection {
         ih.addImage(frame);
     }
     public void run(String[] args, Mat frameInput) {
-        String filenameFaceCascade = args.length > 2 ? args[0] : "src/main/java/trafficcounter/resources/cars.xml";
+        String filenameFaceCascade = args.length > 2 ? args[0] : "src/main/java/trafficcounter/resources/banana2C.xml";
       //  String filenameSideFaceCascade = "src/main/java/trafficcounter/resources/haarcascade_profileface.xml";
-        String filenameEyesCascade = args.length > 2 ? args[1] : "src/main/java/trafficcounter/resources/haarcascade_eye_tree_eyeglasses.xml";
+        String filenameEyesCascade = args.length > 2 ? args[1] : "src/main/java/trafficcounter/resources/banana2C.xml";
         int cameraDevice = args.length > 2 ? Integer.parseInt(args[2]) : 0;
         CascadeClassifier faceCascade = new CascadeClassifier();
         CascadeClassifier sideFaceCascade = new CascadeClassifier();

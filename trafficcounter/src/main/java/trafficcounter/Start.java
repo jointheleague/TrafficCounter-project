@@ -3,6 +3,8 @@ package trafficcounter;
 import java.io.File;
 
 
+
+
 import java.io.FileNotFoundException;
 import java.nio.file.Paths;
 import java.util.*;
@@ -55,8 +57,12 @@ public class Start {
         Mat frame = new Mat(), fgMask = new Mat();
         Scalar lowerb  = new Scalar(0);
         Scalar upperb = new Scalar (150);
-        
+        ImageDetection id = new ImageDetection();
         Scalar topb = new Scalar(255);
+        
+        ArrayList<Integer> xArr = new ArrayList<Integer>();
+        ArrayList<Integer> yArr = new ArrayList<Integer>();
+        
         while (true) {
         capture.read(frame);
         
@@ -68,12 +74,12 @@ public class Start {
         //Imgproc.putText(frame, frameNumberString, new Point(15, 15), Core.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 0));
         
         
-        Imgproc.GaussianBlur(fgMask, fgMask, new Size(7, 7), 0);
+        Imgproc.GaussianBlur(fgMask, fgMask, new Size(9, 9), 0);
         Imgproc.blur(fgMask, fgMask, new Size(40,40));
         Core.inRange(fgMask, lowerb, upperb, fgMask);
         Imgproc.blur(fgMask, fgMask, new Size(40,40));
         Core.inRange(fgMask, lowerb, upperb, fgMask);
-        
+        Imgproc.dilate(fgMask, fgMask, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(100,100)));
         //draws rectangles around blurs
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
@@ -81,20 +87,25 @@ public class Start {
         Imgproc.findContours(fgMask, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
         for(MatOfPoint mop: contours) {
         
-        	/*Rect r = Imgproc.boundingRect(mop);
+        	Rect r = Imgproc.boundingRect(mop);
         	if(r.width*r.height>200) {
         	Imgproc.rectangle(frame, r.tl(), r.br(), new Scalar(0,0,255));
-        	
-        	}*/
+        	xArr.add(r.x+(r.width/2));
+        	yArr.add(r.y+(r.height/2));
+        	}
         	
         }
-       Imgproc.cvtColor(fgMask, fgMask, Imgproc.COLOR_GRAY2RGB);
+        /* Imgproc.cvtColor(fgMask, fgMask, Imgproc.COLOR_GRAY2RGB);
         Core.bitwise_and(frame, fgMask, frame);
         //frame is the output, fgMask is the processed image
         //helper.addImage(frame);
-        ImageDetection id = new ImageDetection();
-        id.run(args, frame);
-        //helper.addImage(frame);
+        
+        //id.run(args, frame); 
+         * */
+        for(int i = 0; i<xArr.size(); i++) {
+        	Imgproc.ellipse(frame, new Point(xArr.get(i), yArr.get(i)), new Size(30,30), 0, 0, 360, new Scalar(0,255,0), 10);
+        }
+        helper.addImage(frame);
         
         }
     }
