@@ -63,7 +63,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     public static ArrayList<LineInfo> lineInfos = new ArrayList<LineInfo>();
     private int carCount;
 
-    private static final Logger LOGGER = new Logger();
+    public static final Logger LOGGER = new Logger();
 
     private static final int TF_OD_API_INPUT_SIZE = 416;
     private static final boolean TF_OD_API_IS_QUANTIZED = false;
@@ -74,7 +74,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     private static final DetectorMode MODE = DetectorMode.TF_OD_API;
     private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.5f;
     private static final boolean MAINTAIN_ASPECT = false;
-    private static final Size DESIRED_PREVIEW_SIZE = new Size(640, 480);
+    private static final Size DESIRED_PREVIEW_SIZE = new Size(1080 , 2280);
     private static final boolean SAVE_PREVIEW_BITMAP = false;
     private static final float TEXT_SIZE_DIP = 10;
     OverlayView trackingOverlay;
@@ -138,9 +138,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         previewHeight = size.getHeight();
 
         sensorOrientation = rotation - getScreenOrientation();
-        LOGGER.i("Camera orientation relative to screen canvas: %d", sensorOrientation);
+        //LOGGER.i("Camera orientation relative to screen canvas: %d", sensorOrientation);
 
-        LOGGER.i("Initializing at size %dx%d", previewWidth, previewHeight);
+        //LOGGER.i("Initializing at size %dx%d", previewWidth, previewHeight);
         rgbFrameBitmap = Bitmap.createBitmap(previewWidth, previewHeight, Config.ARGB_8888);
         croppedBitmap = Bitmap.createBitmap(cropSize, cropSize, Config.ARGB_8888);
 
@@ -180,7 +180,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             return;
         }
         computingDetection = true;
-        LOGGER.i("Preparing image " + currTimestamp + " for detection in bg thread.");
+        //LOGGER.i("Preparing image " + currTimestamp + " for detection in bg thread.");
 
         rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
 
@@ -198,7 +198,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                     @RequiresApi(api = Build.VERSION_CODES.N)
                     @Override
                     public void run() {
-                        LOGGER.i("Running detection on image " + currTimestamp);
+                        //LOGGER.i("Running detection on image " + currTimestamp);
                         final long startTime = SystemClock.uptimeMillis();
                         final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);
                         lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
@@ -228,6 +228,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                                 canvas.drawRect(location, paint);
                                 markers.add(new Marker(location.centerX(), location.centerY()));
                                 System.out.println(carCount);
+                                //LOGGER.d(canvas.getWidth()+" is canvas width   "+canvas.getHeight()+" is canvas height");
                                 //canvas.drawCircle(location.centerX(), location.centerY(), 10,paint);
                                 cropToFrameTransform.mapRect(location);
                                 result.setLocation(location);
@@ -310,7 +311,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 if(markers.get(i).buddy != null) {
                     if(recursiveLineFollow(0, markers.get(i), marksToRemove) >6) {
                         carCount+=1;
-                        System.out.println("possible car found. total cars is "+carCount);
+                        LOGGER.d("possible car found. total cars is "+carCount);
                         oldMarkers.add(markers.get(i));
                     }
                 } else {

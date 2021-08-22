@@ -52,7 +52,7 @@ public class DetectorTest {
   private static final boolean IS_MODEL_QUANTIZED = true;
   private static final String MODEL_FILE = "detect.tflite";
   private static final String LABELS_FILE = "file:///android_asset/labelmap.txt";
-  private static final Size IMAGE_SIZE = new Size(640, 480);
+    private static final Size IMAGE_SIZE = new Size(640, 960);
 
   private Classifier detector;
   private Bitmap croppedBitmap;

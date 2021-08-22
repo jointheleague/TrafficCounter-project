@@ -38,7 +38,7 @@ import org.tensorflow.lite.examples.detection.env.Logger;
 import org.tensorflow.lite.examples.detection.tflite.Classifier.Recognition;
 import org.tensorflow.lite.examples.detection.tflite.LineInfo;
 import org.tensorflow.lite.examples.detection.tflite.Marker;
-
+import org.tensorflow.lite.examples.detection.env.Logger;
 /** A tracker that handles non-max suppression and matches existing objects to new detections. */
 public class MultiBoxTracker {
   private static final float TEXT_SIZE_DIP = 18;
@@ -60,6 +60,7 @@ public class MultiBoxTracker {
     Color.parseColor("#AA33AA"),
     Color.parseColor("#0D0068")
   };
+
   final List<Pair<Float, RectF>> screenRects = new LinkedList<Pair<Float, RectF>>();
   private final Logger logger = new Logger();
   private final Queue<Integer> availableColors = new LinkedList<Integer>();
@@ -148,30 +149,32 @@ public class MultiBoxTracker {
       canvas.drawRoundRect(trackedPos, cornerSize, cornerSize, boxPaint);
       canvas.drawCircle(trackedPos.centerX(), trackedPos.centerY(), 10,boxPaint);
 
-      for(int i = 0; i<DetectorActivity.markers.size(); i++){
-        canvas.drawCircle(DetectorActivity.markers.get(i).x, DetectorActivity.markers.get(i).y, 5, boxPaint);
-        System.out.println(DetectorActivity.markers.get(i).x+" "+DetectorActivity.markers.get(i).y);
-      }
-      //p.setColor(Color.BLUE);
-      for(int i = 0; i<DetectorActivity.oldMarkers.size(); i++){
-        canvas.drawCircle(DetectorActivity.oldMarkers.get(i).x, DetectorActivity.oldMarkers.get(i).y, 5, boxPaint);
-      }
 
-      for(LineInfo lineInfo: DetectorActivity.lineInfos){
-        canvas.drawLine(lineInfo.x1, lineInfo.y1, lineInfo.x2, lineInfo.y2, boxPaint);
-      }
 
 
       final String labelString =
           !TextUtils.isEmpty(recognition.title)
-              ? String.format("%s %.2f", recognition.title, (100 * recognition.detectionConfidence))
+                  ? String.format("%s %.2f", recognition.title, (100 * recognition.detectionConfidence))
               : String.format("%.2f", (100 * recognition.detectionConfidence));
       //            borderedText.drawText(canvas, trackedPos.left + cornerSize, trackedPos.top,
       // labelString);
       borderedText.drawText(
           canvas, trackedPos.left + cornerSize, trackedPos.top, labelString + "%", boxPaint);
     }
+  float newMult = 2.615F;
+    for(int i = 0; i<DetectorActivity.markers.size(); i++){
+      canvas.drawCircle(DetectorActivity.markers.get(i).x*newMult, DetectorActivity.markers.get(i).y*newMult, 5, boxPaint);
+      //out.println(DetectorActivity.markers.get(i).x+" "+DetectorActivity.markers.get(i).y);
+    }
+    //p.setColor(Color.BLUE);
+    for(int i = 0; i<DetectorActivity.oldMarkers.size(); i++){
+      canvas.drawCircle(DetectorActivity.oldMarkers.get(i).x*newMult, DetectorActivity.oldMarkers.get(i).y*newMult, 5, boxPaint);
+    }
 
+    for(LineInfo lineInfo: DetectorActivity.lineInfos){
+      canvas.drawLine(lineInfo.x1*newMult, lineInfo.y1*newMult, lineInfo.x2*newMult, lineInfo.y2*newMult, boxPaint);
+    }
+    DetectorActivity.LOGGER.d(multiplier+" "+frameWidth+" "+frameHeight);
   }
 
   private void processResults(final List<Recognition> results) {
@@ -189,13 +192,13 @@ public class MultiBoxTracker {
       final RectF detectionScreenRect = new RectF();
       rgbFrameToScreen.mapRect(detectionScreenRect, detectionFrameRect);
 
-      logger.v(
-          "Result! Frame: " + result.getLocation() + " mapped to screen:" + detectionScreenRect);
+      //logger.v(
+         // "Result! Frame: " + result.getLocation() + " mapped to screen:" + detectionScreenRect);
 
       screenRects.add(new Pair<Float, RectF>(result.getConfidence(), detectionScreenRect));
 
       if (detectionFrameRect.width() < MIN_SIZE || detectionFrameRect.height() < MIN_SIZE) {
-        logger.w("Degenerate rectangle! " + detectionFrameRect);
+        //logger.w("Degenerate rectangle! " + detectionFrameRect);
         continue;
       }
 
@@ -204,7 +207,7 @@ public class MultiBoxTracker {
 
     trackedObjects.clear();
     if (rectsToTrack.isEmpty()) {
-      logger.v("Nothing to track, aborting.");
+      //logger.v("Nothing to track, aborting.");
       return;
     }
 

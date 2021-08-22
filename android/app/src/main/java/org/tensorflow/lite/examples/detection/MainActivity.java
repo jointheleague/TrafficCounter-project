@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         });
         this.sourceBitmap = Utils.getBitmapFromAsset(MainActivity.this, "kite.jpg");
 
-        this.cropBitmap = Utils.processBitmap(sourceBitmap, TF_OD_API_INPUT_SIZE);
+        this.cropBitmap = Utils.processBitmap(sourceBitmap, TF_OD_API_INPUT_WIDTH);
 
         this.imageView.setImageBitmap(cropBitmap);
 
@@ -70,7 +70,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final Logger LOGGER = new Logger();
 
-    public static final int TF_OD_API_INPUT_SIZE = 416;
+    public static final int TF_OD_API_INPUT_WIDTH = 1080;
+    public static final int TF_OD_API_INPUT_HEIGHT = 2280;
 
     private static final boolean TF_OD_API_IS_QUANTIZED = false;
 
@@ -99,12 +100,12 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageView;
 
     private void initBox() {
-        previewHeight = TF_OD_API_INPUT_SIZE;
-        previewWidth = TF_OD_API_INPUT_SIZE;
+        previewHeight = TF_OD_API_INPUT_HEIGHT;
+        previewWidth = TF_OD_API_INPUT_WIDTH;
         frameToCropTransform =
                 ImageUtils.getTransformationMatrix(
                         previewWidth, previewHeight,
-                        TF_OD_API_INPUT_SIZE, TF_OD_API_INPUT_SIZE,
+                        TF_OD_API_INPUT_WIDTH, TF_OD_API_INPUT_HEIGHT,
                         sensorOrientation, MAINTAIN_ASPECT);
 
         cropToFrameTransform = new Matrix();
@@ -115,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         trackingOverlay.addCallback(
                 canvas -> tracker.draw(canvas));
 
-        tracker.setFrameConfiguration(TF_OD_API_INPUT_SIZE, TF_OD_API_INPUT_SIZE, sensorOrientation);
+        tracker.setFrameConfiguration(TF_OD_API_INPUT_WIDTH, TF_OD_API_INPUT_HEIGHT, sensorOrientation);
 
         try {
             detector =
