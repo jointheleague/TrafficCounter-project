@@ -59,9 +59,13 @@ import org.tensorflow.lite.examples.detection.tracking.MultiBoxTracker;
  */
 public class DetectorActivity extends CameraActivity implements OnImageAvailableListener {
     private ArrayList<Marker> markers = new ArrayList<Marker>();
-    private ArrayList<Marker> oldMarkers = new ArrayList<Marker>();
-    private ArrayList<LineInfo> lineInfos = new ArrayList<LineInfo>();
-    private int carCount;
+
+    //this is a list for each lane. Holds a polygon for each lane. We need to work on getting info to this array during setup of the traffic light.
+    private ArrayList<Polygon> lanePolygons = new ArrayList<Polygon>();
+
+    //private ArrayList<Marker> oldMarkers = new ArrayList<Marker>();
+    //private ArrayList<LineInfo> lineInfos = new ArrayList<LineInfo>();
+    //private int carCount;
 
     private static final Logger LOGGER = new Logger();
 
@@ -279,53 +283,14 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         runInBackground(() -> detector.setNumThreads(numThreads));
     }
 
-    //This might be a problem, using Comparator.
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    //this runs car counts in each lane.
     protected void processMarkers(){
-        Collections.sort(markers, Comparator.comparing(m->m.y));
-        Collections.reverse(markers);
-        for(Marker mark: markers) {mark.timer+=1;}
-        for(int i = 0; i<markers.size(); i++) {
-            INNER_LOOP: for(int j = i+1; j<markers.size(); j++) {
-                if(Math.abs(markers.get(i).x-markers.get(j).x)<80) {
-                    if(markers.get(i).timer+1 == markers.get(j).timer) {
-                        if(Math.sqrt( Math.pow(markers.get(i).x-markers.get(j).x, 2) + Math.pow(markers.get(i).y-markers.get(j).y, 2)) <60) {
-                            oldMarkers.add(markers.get(j));
-                            lineInfos.add(new LineInfo(markers.get(i).x, markers.get(i).y, markers.get(j).x, markers.get(j).y));
-                            markers.get(i).buddy = markers.get(j);
-                            markers.remove(j);
-                            break INNER_LOOP;
-                        }
-                    }
+        for(Marker carPoint: markers){
+            PolyLoopLabel: for(Polygon lanePoly: lanePolygons){
+                if(lanePoly.isPointIntersectingPolygon(carPoint)){
+                    break PolyLoopLabel;
                 }
             }
-        }
-        ArrayList<Marker> marksToRemove = new ArrayList<Marker>();
-        for(int i = 0; i<markers.size(); i++) {
-            if(markers.get(i).timer>4) {
-                if(markers.get(i).buddy != null) {
-                    if(recursiveLineFollow(0, markers.get(i), marksToRemove) >12) {
-                        carCount+=1;
-                        System.out.println("possible car found. total cars is "+carCount);
-                        oldMarkers.add(markers.get(i));
-                    }
-                } else {
-                    marksToRemove.add(markers.get(i));
-                }
-            }
-        }
-        markers.removeAll(marksToRemove);
-        oldMarkers.removeAll(marksToRemove);
-    }
-
-    public int recursiveLineFollow(int n, Marker marker, ArrayList<Marker> marksToRemove) {
-        n+=1;
-        marksToRemove.add(marker);
-
-        if(marker.buddy != null) {
-            return recursiveLineFollow(n, marker.buddy, marksToRemove);
-        } else {
-            return n;
         }
     }
 
